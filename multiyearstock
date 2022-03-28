@@ -1,0 +1,125 @@
+Attribute VB_Name = "Module1"
+Sub stockmarket()
+
+For Each ws In Worksheets
+
+'column headers
+ws.Range("I1").Value = "Ticker"
+ws.Range("J1").Value = "Yearly Change"
+ws.Range("K1").Value = "Percent Change"
+ws.Range("L1").Value = "Total Volume"
+
+'declaring variables
+Dim TickerName As String
+Dim SummaryTable As Long
+SummaryTable = 2
+Dim TotalTicker As Double
+TotalTicker = 0
+
+
+'determine last row of cells
+Dim LastRow As Long
+LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+For i = 2 To LastRow
+
+'adding the total ticker volume
+TotalTicker = TotalTicker + ws.Cells(i, 7).Value
+'checking the ticker names to see if they're the same
+If ws.Cells(i, 1).Value <> ws.Cells(i + 1, 1).Value Then
+
+'setting ticker name
+TickerName = ws.Cells(i, 1).Value
+ws.Range("I" & SummaryTable).Value = TickerName
+'and the total stock volume
+ws.Range("L" & SummaryTable).Value = TotalTicker
+TotalTicker = 0
+
+'yearly change for summary table
+'setting variables
+Dim YearlyOpen As Double
+Dim YearlyClose As Double
+Dim YearlyChange As Double
+Dim percentchange As Double
+
+'setting variable amounts
+Previousamt = 2
+YearlyOpen = ws.Range("C" & Previousamt)
+YearlyClose = ws.Range("F" & i)
+YearlyChange = YearlyClose - YearlyOpen
+ws.Range("J" & SummaryTable).Value = YearlyChange
+percentchange = YearlyChange / YearlyOpen
+
+'formatting for percentage
+ws.Range("K" & SummaryTable).NumberFormat = "0.00%"
+'adding to summary table
+ws.Range("K" & SummaryTable) = percentchange
+
+'changing color for positive/negative change
+If ws.Range("J" & SummaryTable).Value >= 0 Then
+    ws.Range("J" & SummaryTable).Interior.ColorIndex = 4
+Else
+    ws.Range("J" & SummaryTable).Interior.ColorIndex = 3
+End If
+
+'looping to next tickers
+SummaryTable = SummaryTable + 1
+Previousamt = i + 1
+End If
+
+Next i
+
+'BONUS
+'labelling
+ws.Range("o2").Value = "Greatest % Increase"
+ws.Range("o3").Value = "Greatest % Decrease"
+ws.Range("o4").Value = "Greatest Total Volume"
+ws.Range("p1").Value = "Ticker"
+ws.Range("q1").Value = "Value"
+Dim rng As Range
+Dim max As Double
+Dim min As Double
+
+For i = 2 To 3001
+
+'finding the highest % change
+Set rng = ws.Range("k2:k3001")
+max = Application.WorksheetFunction.max(rng)
+ws.Range("q2").Value = max
+ws.Range("q2:q3").NumberFormat = "0.00%"
+
+'finding lowest % change
+min = Application.WorksheetFunction.min(rng)
+ws.Range("q3").Value = min
+
+'finding largest volume
+Set volume = ws.Range("l2:l3001")
+maxvolume = Application.WorksheetFunction.max(volume)
+ws.Range("q4").Value = maxvolume
+ws.Range("q4").NumberFormat = "000"
+
+'getting the ticker names
+If ws.Cells(i, 11).Value = max Then
+ws.Cells(2, 16).Value = ws.Cells(i, 9)
+
+End If
+
+If ws.Cells(i, 11).Value = min Then
+ws.Cells(3, 16).Value = ws.Cells(i, 9)
+
+End If
+
+If ws.Cells(i, 12).Value = maxvolume Then
+ws.Cells(4, 16).Value = ws.Cells(i, 9)
+
+End If
+
+
+Next i
+
+
+Next ws
+
+
+End Sub
+
